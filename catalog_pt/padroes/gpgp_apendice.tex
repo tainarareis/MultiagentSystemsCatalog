@@ -1,0 +1,65 @@
+\section{\textit{Generalized Partial Global Planning}}\label{appendix:gpgp}
+
+A seguir é apresentado um pseudo-código que simula o fluxo entre os agentes simulando as ações descritas na Seção \ref{sec:gpgp}.
+
+\begin{lstlisting}
+package gpgp;
+
+public class GPGP {
+
+	public static void main(String[] args) {
+
+	//At time=0 each agent creates its task structure
+	Agent agentA = new Agent();
+	agentA.addTask(A11, 3); //addTask(taskName, duration)
+	agentA.addTask(A12,3);
+	
+	Agent agentB = new Agent();
+	agentB.addTask(B11,2);
+	
+	Agent agentC = new Agent();
+	agentC.addTask(C11, 4);
+	agentC.addTask(C12, 1);
+		
+	//At time=1, each agent makes its own schedule
+	agentA.schedule(A11, 1, 3); //schedule(taskName, startTime, endTime)
+	agentA.schedule(A12, 4, 6);
+	agentB.schedule(B11, 1, 2);
+	agentC.schedule(C12, 1, 1);
+	
+	//At time=2, gpgp plans the tasks considering the global needs
+	GeneralizedPartialGlobalPlanner gpgp = new GeneralizedPartialGlobalPlanner();
+	winner = gpgp.generatePlanning(1, 2) //generates the winner for the interval from time 1 to 2
+	gpgp.notifyAgents(agentA, agentB, agentC); //notifies all agents about the winner of the interval
+
+	//Consider the winner was agentB...
+	agentB.executeTask(B11);
+	agentA.busyInterval(1, 2); //busyInterval(startTime, endTime)
+	agentC.busyInterval(1, 2);
+	
+	//agentA reschedules, and agentC schedules task C11 
+	agentA.schedule(A11, 5, 7);
+	agentA.schedule(A12, 2, 4);
+	agentC.schedule(C11, 3, 6);
+	
+	//At time=3
+	winner = gpgp.generateaPlanning(3, 4);
+	gpgp.notifyAgents(agentA, agentB, agentC);
+	
+	//Consider the winner was agentA with task A11...
+	agentA.executeTask(A11);
+	agentB.busyInterval(5, 7);
+	agentC.busyInterval(5, 7);
+	
+	//agentC reschedules
+	agentC.schedule(C11, 7, 10);
+	
+	//At time=4
+	winner = gpgp.generatePlanning(7, 10);
+	
+	//Consider the winner was agentA with task C11...
+	agentC.executeTask(C11);
+	
+	}
+}
+\end{lstlisting}
